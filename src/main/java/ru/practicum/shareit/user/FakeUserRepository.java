@@ -47,7 +47,7 @@ public class FakeUserRepository {
         return user1;
     }
 
-    public void deleteUser(Long id){
+    public void deleteUser(Long id) {
         userStorage.remove(id);
     }
 

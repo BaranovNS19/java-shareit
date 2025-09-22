@@ -10,7 +10,7 @@ public class FakeItemRequestRepository {
     private static Long requestId = 0L;
 
     public ItemRequest addRequest(ItemRequest itemRequest) {
-        requestId ++;
+        requestId++;
         itemRequest.setId(requestId);
         requests.put(itemRequest.getId(), itemRequest);
         return itemRequest;

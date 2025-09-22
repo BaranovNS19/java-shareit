@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 @Service
-public class ItemRequestServiceImpl implements ItemRequestService{
+public class ItemRequestServiceImpl implements ItemRequestService {
 
     private final FakeItemRequestRepository fakeItemRequestRepository;
 
