@@ -18,4 +18,10 @@ public class ErrorHandler {
     public ErrorResponse handleNotFoundData(final  NotFoundException e) {
         return new ErrorResponse("Данные не найдены", e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleForbidden(final  ForbiddenException e) {
+        return new ErrorResponse("Нет доступа", e.getMessage());
+    }
 }

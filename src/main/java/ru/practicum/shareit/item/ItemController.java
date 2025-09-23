@@ -4,8 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.FakeUserRepository;
+import ru.practicum.shareit.user.UserStorage;
 
 import java.util.List;
 
@@ -17,18 +16,18 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
-    private final FakeUserRepository fakeUserRepository;
+    private final UserStorage fakeUserRepository;
 
     @Autowired
-    public ItemController(ItemService itemService, FakeUserRepository fakeUserRepository) {
+    public ItemController(ItemService itemService, UserStorage fakeUserRepository) {
         this.itemService = itemService;
         this.fakeUserRepository = fakeUserRepository;
     }
 
     @PostMapping
-    public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") Long userId, @RequestBody @Valid Item item) {
+    public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") Long userId, @RequestBody @Valid ItemDto itemDto) {
         fakeUserRepository.getUserById(userId);
-        return itemService.createItem(item, userId);
+        return itemService.createItem(itemDto, userId);
     }
 
     @GetMapping("/{id}")

@@ -3,23 +3,24 @@ package ru.practicum.shareit.item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
 
 @Service
 public class ItemServiceImpl implements ItemService {
 
-    private final FakeItemRepository fakeItemRepository;
+    private final ItemStorage fakeItemRepository;
+    private final ItemMapper itemMapper;
 
     @Autowired
-    public ItemServiceImpl(FakeItemRepository fakeItemRepository) {
+    public ItemServiceImpl(ItemStorage fakeItemRepository, ItemMapper itemMapper) {
         this.fakeItemRepository = fakeItemRepository;
+        this.itemMapper = itemMapper;
     }
 
     @Override
-    public ItemDto createItem(Item item, Long userId) {
-        return ItemDto.toItemDto(fakeItemRepository.addItem(item, userId));
+    public ItemDto createItem(ItemDto item, Long userId) {
+        return ItemDto.toItemDto(fakeItemRepository.addItem(itemMapper.toItem(item, userId), userId));
     }
 
     @Override

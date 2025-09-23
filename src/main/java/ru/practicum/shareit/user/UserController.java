@@ -19,8 +19,8 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody @Valid User user) {
-        return userService.creteUser(user);
+    public User createUser(@RequestBody @Valid UserDto userDto) {
+        return userService.creteUser(userDto);
     }
 
     @GetMapping("/{id}")
@@ -29,8 +29,8 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user) {
-        return userService.updateUser(id, user);
+    public User updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+        return userService.updateUser(id, userDto);
     }
 
     @DeleteMapping("/{id}")

@@ -7,7 +7,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import java.util.HashMap;
 
 @Repository
-public class FakeUserRepository {
+public class UserStorage {
     private final HashMap<Long, User> userStorage = new HashMap<>();
     private static Long userId = 0L;
 
@@ -31,9 +31,11 @@ public class FakeUserRepository {
     }
 
     public User updateUser(Long id, User user) {
-        for (User u : userStorage.values()) {
-            if (u.getEmail().equals(user.getEmail())) {
-                throw new DataAlreadyExist("пользователь с почтой [" + user.getEmail() + "] уже существует");
+        if (user.getEmail() != null) {
+            for (User u : userStorage.values()) {
+                if (u.getEmail().equals(user.getEmail())) {
+                    throw new DataAlreadyExist("пользователь с почтой [" + user.getEmail() + "] уже существует");
+                }
             }
         }
         User user1 = getUserById(id);

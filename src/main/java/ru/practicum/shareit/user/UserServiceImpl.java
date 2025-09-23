@@ -5,16 +5,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private final FakeUserRepository fakeUserRepository;
+    private final UserStorage fakeUserRepository;
 
     @Autowired
-    public UserServiceImpl(FakeUserRepository fakeUserRepository) {
+    public UserServiceImpl(UserStorage fakeUserRepository) {
         this.fakeUserRepository = fakeUserRepository;
     }
 
     @Override
-    public User creteUser(User user) {
-        return fakeUserRepository.addUser(user);
+    public User creteUser(UserDto userDto) {
+        return fakeUserRepository.addUser(UserMapper.toUser(userDto));
     }
 
     @Override
@@ -23,8 +23,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long id, User user) {
-        return fakeUserRepository.updateUser(id, user);
+    public User updateUser(Long id, UserDto userDto) {
+        return fakeUserRepository.updateUser(id, UserMapper.toUser(userDto));
     }
 
     @Override

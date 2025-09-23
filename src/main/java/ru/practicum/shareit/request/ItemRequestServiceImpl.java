@@ -7,15 +7,15 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 @Service
 public class ItemRequestServiceImpl implements ItemRequestService {
 
-    private final FakeItemRequestRepository fakeItemRequestRepository;
+    private final ItemRequestStorage fakeItemRequestRepository;
 
     @Autowired
-    public ItemRequestServiceImpl(FakeItemRequestRepository fakeItemRequestRepository) {
+    public ItemRequestServiceImpl(ItemRequestStorage fakeItemRequestRepository) {
         this.fakeItemRequestRepository = fakeItemRequestRepository;
     }
 
     @Override
     public ItemRequestDto createRequest(ItemRequest itemRequest) {
-        return ItemRequestDto.toItemRequestDto(fakeItemRequestRepository.addRequest(itemRequest));
+        return ItemRequestMapper.toItemRequestDto(fakeItemRequestRepository.addRequest(itemRequest));
     }
 }
