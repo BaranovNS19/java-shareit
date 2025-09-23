@@ -17,8 +17,8 @@ public class ItemRequestStorage {
     }
 
     public ItemRequest getItemRequestByDescription(String description) {
-        for (ItemRequest ir : requests.values()){
-            if (ir.getDescription().equals(description)){
+        for (ItemRequest ir : requests.values()) {
+            if (ir.getDescription().equals(description)) {
                 return ir;
             }
         }
