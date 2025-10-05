@@ -5,17 +5,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 @AllArgsConstructor
-public class User {
-    private Long id;
+public class UserDto {
     @NotNull
     private String name;
     @NotNull
     @Email
     private String email;
-
 }
