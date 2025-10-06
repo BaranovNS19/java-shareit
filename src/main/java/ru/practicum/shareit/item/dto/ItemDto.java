@@ -8,6 +8,9 @@ import lombok.Data;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequest;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 /**
  * TODO Sprint add-controllers.
  */
@@ -26,13 +29,7 @@ public class ItemDto {
     @NotNull
     private Boolean available;
     private ItemRequest request;
-
-    public static ItemDto toItemDto(Item item) {
-        return new ItemDto(item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getRequest()
-        );
-    }
+    private LocalDateTime lastBooking;
+    private LocalDateTime nextBooking;
+    private List<CommentDto> comments;
 }
