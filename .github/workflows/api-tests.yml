@@ -4,7 +4,5 @@ on:
   pull_request:
 
 jobs:
-  api-tests:
+  build:
     uses: yandex-praktikum/java-shareit/.github/workflows/api-tests.yml@ci
-    with:
-      postman-collection: './postman/sprint.json'
