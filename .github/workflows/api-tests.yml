@@ -1,21 +1,8 @@
-- name: Run Application and Tests
-  run: |
-    # Запускаем приложение
-    java -jar target/shareit-0.0.1-SNAPSHOT.jar &
-    APP_PID=$!
-    
-    # Ждем пока health endpoint станет доступен
-    echo "Waiting for application to be ready..."
-    for i in {1..12}; do
-      if curl -s http://localhost:8080/health >/dev/null; then
-        echo "Application is ready!"
-        break
-      fi
-      echo "Waiting for application... ($i/12)"
-      sleep 10
-    done
-    
-    # Запускаем тесты
-    newman run ./tests/postman/sprint.json --delay-request 100
-    
-    kill $APP_PID
+name: ShareIt API Tests
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    uses: yandex-praktikum/java-shareit/.github/workflows/api-tests.yml@ci
