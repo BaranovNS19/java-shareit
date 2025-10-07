@@ -2,7 +2,75 @@ name: ShareIt API Tests
 
 on:
   pull_request:
+    branches: [ main, master ]
 
 jobs:
-  build:
-    uses: yandex-praktikum/java-shareit/.github/workflows/api-tests.yml@ci
+  api-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: shareit
+          POSTGRES_USER: shareit_user
+          POSTGRES_PASSWORD: shareit_pass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build application
+        run: |
+          ./mvnw clean package -DskipTests
+
+      - name: Start application
+        run: |
+          java -jar target/shareit*.jar &
+          echo $! > app.pid
+          sleep 30
+
+      - name: Wait for application to start
+        run: |
+          timeout 120 bash -c 'until curl -s http://localhost:8080 > /dev/null; do echo "Waiting for application..."; sleep 5; done'
+
+      - name: Install Newman
+        run: |
+          npm install -g newman
+
+      - name: Run API Tests
+        run: |
+          newman run ./postman/sprint.json \
+            --delay-request 50 \
+            -r cli,htmlextra \
+            --verbose \
+            --color on \
+            --reporter-htmlextra-darkTheme \
+            --reporter-htmlextra-export reports/shareIt.html \
+            --reporter-htmlextra-title "Отчет по тестам" \
+            --reporter-htmlextra-logs true
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-test-report
+          path: reports/shareIt.html
+
+      - name: Stop application
+        if: always()
+        run: |
+          kill $(cat app.pid) 2>/dev/null || true
