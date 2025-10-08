@@ -45,6 +45,12 @@ public class BookingServiceImpl implements BookingService {
                 bookingDto.getEnd().isBefore(LocalDateTime.now()) || bookingDto.getEnd().isBefore(bookingDto.getStart())) {
             throw new BadRequestException("Вещь [" + item.getId() + "] недоступна для бронирования");
         }
+
+        for (ItemDto itemDto : itemService.getItemsByUser(userId)) {
+            if (Objects.equals(itemMapper.toItem(itemDto, userId).getOwner().getId(), userId)) {
+                throw new ForbiddenException("собственные вещи недоступны для бронирования");
+            }
+        }
         Booking booking = bookingMapper.toBooking(bookingDto, userId, Status.WAITING);
         booking.setBooker(user);
         booking.setItem(item);
@@ -54,7 +60,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public Booking approveBooking(Long bookingId, Boolean approve, Long userId) {
+    public Booking approveBooking(Long bookingId, boolean approve, Long userId) {
         Booking booking = getBookingById(bookingId);
         if (!Objects.equals(booking.getItem().getOwner().getId(), userId)) {
             throw new ForbiddenException("Пользователь [" + userId + "] не является владельцем вещи [" + booking
@@ -85,11 +91,16 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<Booking> getBookingsByUser(Long userId, State state) {
         userService.getUser(userId);
-        if (state == null) {
-            return bookingRepository.findByBookerIdOrderByStartDesc(userId);
-        }
-        if (state.equals(State.REJECTED)) {
-            bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+        switch (state) {
+            case ALL -> {
+                return bookingRepository.findByBookerIdOrderByStartDesc(userId);
+            }
+            case REJECTED -> {
+                return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+            }
+            case PAST -> {
+                return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.APPROVED);
+            }
         }
         return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
     }
