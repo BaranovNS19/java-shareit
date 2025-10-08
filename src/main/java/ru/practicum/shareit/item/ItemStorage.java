@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+@Deprecated
 @Repository
 public class ItemStorage {
     private final HashMap<Long, Item> items = new HashMap<>();
@@ -45,7 +46,7 @@ public class ItemStorage {
         List<ItemDto> itemsByUser = new ArrayList<>();
         for (Item i : items.values()) {
             if (Objects.equals(i.getOwner().getId(), id)) {
-                itemsByUser.add(ItemDto.toItemDto(i));
+                itemsByUser.add(itemMapper.toItemDto(i));
             }
         }
         return itemsByUser;
@@ -60,7 +61,7 @@ public class ItemStorage {
         for (Item i : items.values()) {
             if ((i.getName().toLowerCase().contains(lowerText) || i.getDescription().toLowerCase()
                     .contains(lowerText)) && i.getAvailable()) {
-                itemsByText.add(ItemDto.toItemDto(i));
+                itemsByText.add(itemMapper.toItemDto(i));
             }
         }
         return itemsByText;

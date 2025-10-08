@@ -24,4 +24,10 @@ public class ErrorHandler {
     public ErrorResponse handleForbidden(final  ForbiddenException e) {
         return new ErrorResponse("Нет доступа", e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadRequest(final BadRequestException e) {
+        return new ErrorResponse("Некорректный запрос", e.getMessage());
+    }
 }
