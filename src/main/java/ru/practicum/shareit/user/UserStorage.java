@@ -6,6 +6,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 
 import java.util.HashMap;
 
+@Deprecated
 @Repository
 public class UserStorage {
     private final HashMap<Long, User> userStorage = new HashMap<>();
