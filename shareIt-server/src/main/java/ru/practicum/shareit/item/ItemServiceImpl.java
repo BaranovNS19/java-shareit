@@ -53,7 +53,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto createItem(ItemDto itemDto, Long userId) {
         User owner = userService.getUser(userId);
         Item itemMap = itemMapper.toItem(itemDto, userId);
-        if (itemDto.getRequestId() != null){
+        if (itemDto.getRequestId() != null) {
             ItemRequest itemRequest = itemRequestMapper.toItemRequest(itemRequestService.getRequestById(userId,
                     itemDto.getRequestId()));
             itemMap.setRequest(itemRequest);
