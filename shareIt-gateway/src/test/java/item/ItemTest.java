@@ -15,6 +15,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -67,6 +68,19 @@ public class ItemTest {
         itemDto.setName("testName");
         itemDto.setDescription("testDescription");
         mvc.perform(post("/users")
+                        .content(mapper.writeValueAsString(itemDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(404));
+    }
+
+    @Test
+    public void updateItemWithoutAvailable() throws Exception {
+        itemDto = new ItemDto();
+        itemDto.setName("testName");
+        itemDto.setDescription("testDescription");
+        mvc.perform(patch("/users")
                         .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
