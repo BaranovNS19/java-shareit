@@ -6,14 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.request.ItemRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
  * TODO Sprint add-controllers.
-  */
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
