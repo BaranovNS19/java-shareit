@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request;
 
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.item.CommentRepository;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -19,11 +20,13 @@ public class ItemRequestMapper {
     private final UserService userService;
     private final ItemRepository itemRepository;
     private final ItemMapper itemMapper;
+    private final CommentRepository commentRepository;
 
-    public ItemRequestMapper(UserService userService, ItemRepository itemRepository, ItemMapper itemMapper) {
+    public ItemRequestMapper(UserService userService, ItemRepository itemRepository, ItemMapper itemMapper, CommentRepository commentRepository) {
         this.userService = userService;
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
+        this.commentRepository = commentRepository;
     }
 
     public ItemRequest toItemRequest(ItemRequestDto itemRequestDto, Long userId) {
@@ -34,7 +37,7 @@ public class ItemRequestMapper {
     public ItemRequestDtoResponse toItemRequestDtoResponse(ItemRequest itemRequest) {
         List<ItemDto> itemDtos = new ArrayList<>();
         for (Item i : itemRepository.findByRequestId(itemRequest.getId())) {
-            itemDtos.add(itemMapper.toItemDto(i));
+            itemDtos.add(itemMapper.toItemDto(i, commentRepository.findByItemIdOrderByCreatedDesc(i.getId())));
         }
         return new ItemRequestDtoResponse(itemRequest.getId(), itemRequest.getDescription(), itemRequest.getRequestor(),
                 itemRequest.getCreated(), itemDtos);

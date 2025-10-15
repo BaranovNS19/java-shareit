@@ -1,6 +1,8 @@
 package ru.practicum.shareit.request;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -13,14 +15,12 @@ import java.util.List;
 @Service
 public class ItemRequestServiceImpl implements ItemRequestService {
 
-    private final ItemRequestStorage fakeItemRequestRepository;
     private final ItemRequestMapper mapper;
     private final ItemRequestRepository itemRequestRepository;
     private final UserService userService;
 
     @Autowired
-    public ItemRequestServiceImpl(ItemRequestStorage fakeItemRequestRepository, ItemRequestMapper mapper, ItemRequestRepository itemRequestRepository, UserService userService) {
-        this.fakeItemRequestRepository = fakeItemRequestRepository;
+    public ItemRequestServiceImpl(ItemRequestMapper mapper, ItemRequestRepository itemRequestRepository, UserService userService) {
         this.mapper = mapper;
         this.itemRequestRepository = itemRequestRepository;
         this.userService = userService;
@@ -32,9 +32,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequest> getAllRequests(Long userId) {
+    public Page<ItemRequestDtoResponse> getAllRequests(Long userId, PageRequest pageRequest) {
         userService.getUser(userId);
-        return itemRequestRepository.findAllByOrderByCreatedDesc();
+        Page<ItemRequest> itemRequests = itemRequestRepository.findByRequestorIdNotOrderByCreatedDesc(userId, pageRequest);
+        return itemRequests.map(mapper::toItemRequestDtoResponse);
     }
 
     @Override

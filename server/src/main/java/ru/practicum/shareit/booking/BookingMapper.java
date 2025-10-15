@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.UserService;
 
 @Component
@@ -24,9 +25,9 @@ public class BookingMapper {
         return new BookingDto(booking.getId(), booking.getItem().getId(), booking.getStart(), booking.getEnd());
     }
 
-    public Booking toBooking(BookingDto bookingDto, Long userId, Status status) {
+    public Booking toBooking(BookingDto bookingDto, Long userId, Status status, ItemRequest itemRequest) {
         return new Booking(bookingDto.getId(), bookingDto.getStart(), bookingDto.getEnd(),
-                itemMapper.toItem(itemService.getItem(bookingDto.getItemId(), userId), userId),
+                itemMapper.toItem(itemService.getItem(bookingDto.getItemId(), userId), userService.getUser(userId), itemRequest),
                 userService.getUser(userId), status);
     }
 }

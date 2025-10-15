@@ -52,7 +52,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemDto createItem(ItemDto itemDto, Long userId) {
         User owner = userService.getUser(userId);
-        Item itemMap = itemMapper.toItem(itemDto, userId);
+        Item itemMap = itemMapper.toItem(itemDto, owner, null);
         if (itemDto.getRequestId() != null) {
             ItemRequest itemRequest = itemRequestMapper.toItemRequest(itemRequestService.getRequestById(userId,
                     itemDto.getRequestId()));
@@ -60,20 +60,23 @@ public class ItemServiceImpl implements ItemService {
         }
         itemMap.setOwner(owner);
         itemRepository.save(itemMap);
-        return itemMapper.toItemDto(itemMap);
+        List<Comment> comments = commentRepository.findByItemIdOrderByCreatedDesc(itemMap.getId());
+        return itemMapper.toItemDto(itemMap, comments);
     }
 
     @Override
     public ItemDto getItem(Long id, Long userId) {
-        return itemMapper.toItemDto(itemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Вещь с id [" + id + "] не найдена")));
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Вещь с id [" + id + "] не найдена"));
+        List<Comment> comments = commentRepository.findByItemIdOrderByCreatedDesc(item.getId());
+        return itemMapper.toItemDto(item, comments);
     }
 
     @Override
     public List<ItemDto> getItemsByUser(Long id) {
         List<ItemDto> result = new ArrayList<>();
         for (Item i : itemRepository.findByOwnerId(id)) {
-            result.add(itemMapper.toItemDto(i));
+            result.add(itemMapper.toItemDto(i, commentRepository.findByItemIdOrderByCreatedDesc(i.getId())));
         }
         return result;
     }
@@ -85,18 +88,23 @@ public class ItemServiceImpl implements ItemService {
         }
         List<ItemDto> result = new ArrayList<>();
         for (Item i : itemRepository.searchAvailableItemsByText(text)) {
-            result.add(itemMapper.toItemDto(i));
+            result.add(itemMapper.toItemDto(i, commentRepository.findByItemIdOrderByCreatedDesc(i.getId())));
         }
         return result;
     }
 
     @Override
     public ItemDto updateItem(Long userId, Long id, ItemDto itemDto) {
-        userService.getUser(userId);
-        if (!Objects.equals(itemMapper.toItem(itemDto, userId).getOwner().getId(), userId)) {
+        User user = userService.getUser(userId);
+        ItemRequest itemRequest = null;
+        if (itemDto.getRequestId() != null) {
+            itemRequest = itemRequestMapper.toItemRequest(itemRequestService.getRequestById(userId,
+                    itemDto.getRequestId()));
+        }
+        if (!Objects.equals(itemMapper.toItem(itemDto, user, itemRequest).getOwner().getId(), userId)) {
             throw new ForbiddenException("пользователь [" + userId + "] не является владельцем вещи [" + id + "]");
         }
-        Item item = itemMapper.toItem(getItem(id, userId), userId);
+        Item item = itemMapper.toItem(getItem(id, userId), user, itemRequest);
         if (itemDto.getName() != null) {
             item.setName(itemDto.getName());
         }
@@ -106,13 +114,19 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
-        return itemMapper.toItemDto(item);
+        List<Comment> comments = commentRepository.findByItemIdOrderByCreatedDesc(item.getId());
+        return itemMapper.toItemDto(item, comments);
     }
 
     @Override
     public CommentDto addComment(Long userId, Long itemId, CommentDto commentDto) {
         User user = userService.getUser(userId);
-        Item item = itemMapper.toItem(getItem(itemId, userId), userId);
+        ItemRequest itemRequest = null;
+        if (getItem(itemId, userId).getRequestId() != null) {
+            itemRequest = itemRequestMapper.toItemRequest(itemRequestService.getRequestById(userId,
+                    getItem(itemId, userId).getRequestId()));
+        }
+        Item item = itemMapper.toItem(getItem(itemId, userId), user, itemRequest);
         List<Booking> userBookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.APPROVED);
         boolean hasCompletedBooking = userBookings.stream()
                 .anyMatch(booking ->

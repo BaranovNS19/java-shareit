@@ -2,9 +2,12 @@ package ru.practicum.shareit.client;
 
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
 
 import java.util.List;
 
@@ -19,7 +22,7 @@ public interface ItemRequestFeignClient {
                                          @RequestHeader("X-Sharer-User-Id") Long userId);
 
     @GetMapping("/all")
-    ResponseEntity<List<Object>> getAllItemRequests(@RequestHeader("X-Sharer-User-Id") Long userId);
+    Page<ItemRequestDtoResponse> getAllItemRequests(@RequestHeader("X-Sharer-User-Id") Long userId, PageRequest pageRequest);
 
     @GetMapping("/{id}")
     ResponseEntity<Object> getRequestById(@RequestHeader("X-Sharer-User-Id") Long userId,

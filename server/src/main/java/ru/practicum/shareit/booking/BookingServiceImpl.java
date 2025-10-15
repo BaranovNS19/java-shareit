@@ -10,6 +10,9 @@ import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestMapper;
+import ru.practicum.shareit.request.ItemRequestService;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
@@ -25,32 +28,42 @@ public class BookingServiceImpl implements BookingService {
     private final UserService userService;
     private final ItemService itemService;
     private final ItemMapper itemMapper;
+    private final ItemRequestMapper itemRequestMapper;
+    private final ItemRequestService itemRequestService;
 
     @Autowired
-    public BookingServiceImpl(BookingMapper bookingMapper, BookingRepository bookingRepository, UserService userService, ItemService itemService, ItemMapper itemMapper) {
+    public BookingServiceImpl(BookingMapper bookingMapper, BookingRepository bookingRepository, UserService userService, ItemService itemService, ItemMapper itemMapper, ItemRequestMapper itemRequestMapper, ItemRequestService itemRequestService) {
         this.bookingMapper = bookingMapper;
         this.bookingRepository = bookingRepository;
         this.userService = userService;
         this.itemService = itemService;
         this.itemMapper = itemMapper;
+        this.itemRequestMapper = itemRequestMapper;
+        this.itemRequestService = itemRequestService;
     }
 
     @Override
     @Transactional
     public Booking createBooking(Long userId, BookingDto bookingDto) {
         User user = userService.getUser(userId);
-        Item item = itemMapper.toItem(itemService.getItem(bookingDto.getItemId(), userId), userId);
+        ItemDto itemDto = itemService.getItem(bookingDto.getItemId(), userId);
+        ItemRequest itemRequest = null;
+        if (itemDto.getRequestId() != null) {
+            itemRequest = itemRequestMapper.toItemRequest(itemRequestService.getRequestById(userId,
+                    itemDto.getRequestId()));
+        }
+        Item item = itemMapper.toItem(itemDto, user, itemRequest);
         if (!item.getAvailable() || bookingDto.getStart().isBefore(LocalDateTime.now()) ||
                 bookingDto.getEnd().isBefore(LocalDateTime.now()) || bookingDto.getEnd().isBefore(bookingDto.getStart())) {
             throw new BadRequestException("Вещь [" + item.getId() + "] недоступна для бронирования");
         }
 
-        for (ItemDto itemDto : itemService.getItemsByUser(userId)) {
-            if (Objects.equals(itemMapper.toItem(itemDto, userId).getOwner().getId(), userId)) {
+        for (ItemDto idto : itemService.getItemsByUser(userId)) {
+            if (Objects.equals(itemMapper.toItem(idto, user, itemRequest).getOwner().getId(), userId)) {
                 throw new ForbiddenException("собственные вещи недоступны для бронирования");
             }
         }
-        Booking booking = bookingMapper.toBooking(bookingDto, userId, Status.WAITING);
+        Booking booking = bookingMapper.toBooking(bookingDto, userId, Status.WAITING, itemRequest);
         booking.setBooker(user);
         booking.setItem(item);
         bookingRepository.save(booking);
@@ -70,7 +83,7 @@ public class BookingServiceImpl implements BookingService {
         if (approve) {
             booking.setStatus(Status.APPROVED);
             itemService.updateItem(userId, booking.getItem().getId(), new ItemDto(null, null, null,
-                    false, null, null, null, null));
+                    false, null, null, null, null, null));
         } else {
             booking.setStatus(Status.REJECTED);
         }
